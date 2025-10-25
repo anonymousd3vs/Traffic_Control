@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Traffic Control Frontend
 # Stage 1: Build
-FROM node:18-alpine as builder
+FROM node:18-alpine AS builder
 
 WORKDIR /build
 
