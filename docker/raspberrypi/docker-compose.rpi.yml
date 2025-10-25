@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+  # Backend Service (Optimized for Raspberry Pi)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.rpi
+    container_name: traffic-control-backend
+    ports:
+      - "8765:8765"
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8765
+      - DETECTION_MODE=video
+      - PYTHONUNBUFFERED=1
+      - WORKERS=2
+      - VIDEO_PLAYBACK_FPS=15
+      - CONFIDENCE_THRESHOLD=0.6
+    volumes:
+      # Models
+      - ./models:/app/models:ro
+      # Configuration
+      - ./config:/app/config:rw
+      # Videos
+      - ./videos:/app/videos:ro
+      # Logs
+      - ./logs/backend:/app/logs
+    networks:
+      - traffic-control
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 768M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8765/health')"]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 60s
+
+  # Frontend Service (Nginx)
+  frontend:
+    image: nginx:alpine
+    container_name: traffic-control-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dashboard/frontend/dist:/usr/share/nginx/html:ro
+      - ./docker/frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./logs/frontend:/var/log/nginx
+    networks:
+      - traffic-control
+    depends_on:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 10s
+
+networks:
+  traffic-control:
+    driver: bridge
+
+volumes:
+  backend-logs:
+  frontend-logs:

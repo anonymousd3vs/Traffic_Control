@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  # Backend Service
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: traffic-control-backend
+    ports:
+      - "8765:8765"
+    environment:
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8765
+      - DETECTION_MODE=video
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Models
+      - ./models:/app/models:ro
+      # Configuration
+      - ./config:/app/config:rw
+      # Videos (mount your videos here)
+      - ./videos:/app/videos:ro
+      # Logs
+      - ./logs/backend:/app/logs
+    networks:
+      - traffic-control
+    depends_on:
+      - frontend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8765/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: traffic-control-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://backend:8765
+    volumes:
+      - ./logs/frontend:/var/log/nginx
+    networks:
+      - traffic-control
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  traffic-control:
+    driver: bridge
+
+volumes:
+  backend-logs:
+  frontend-logs:

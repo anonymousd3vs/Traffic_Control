@@ -1,0 +1,12 @@
+# Dashboard Backend Dependencies
+# Real-time communication and web server
+python-socketio>=5.10.0
+aiohttp>=3.9.0
+eventlet>=0.33.0
+
+# For future API authentication (optional)
+pyjwt>=2.8.0
+
+# Already in main requirements.txt but listed for clarity:
+# opencv-python>=4.8.0
+# numpy>=1.24.0
