@@ -63,11 +63,13 @@ npm run dev
 #### Prerequisites
 
 1. **Python 3.10+**
+
    ```bash
    python --version  # Should be 3.10 or higher
    ```
 
 2. **Node.js 18+**
+
    ```bash
    node --version    # Should be v18 or higher
    npm --version     # Should be 9 or higher
@@ -335,7 +337,7 @@ Edit `config/development.yaml`:
 
 ```yaml
 detection:
-  mode: zone              # zone or line
+  mode: zone # zone or line
   confidence: 0.5
   gpu_enabled: false
   frame_width: 1280
@@ -361,13 +363,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8765',
+      "/api": {
+        target: "http://localhost:8765",
         changeOrigin: true,
-      }
-    }
-  }
-})
+      },
+    },
+  },
+});
 ```
 
 ---
@@ -717,6 +719,7 @@ sudo systemctl start traffic-control
 ## 💡 Tips & Best Practices
 
 ✅ **DO:**
+
 - Use virtual environment for Python
 - Keep models in `optimized_models/` folder
 - Use zone-based mode for better performance
@@ -724,6 +727,7 @@ sudo systemctl start traffic-control
 - Monitor resource usage
 
 ❌ **DON'T:**
+
 - Install packages globally (use venv)
 - Store videos in git repo
 - Run as root (Linux)

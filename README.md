@@ -734,6 +734,82 @@ Comprehensive documentation available in `docs/` folder:
 
 ---
 
+## 🐳 Docker Deployment
+
+**Status:** ✅ Production Ready
+
+Complete Docker setup for seamless deployment across Windows, Linux, macOS, and Raspberry Pi 5.
+
+### Quick Start - Docker Compose
+
+```bash
+# Clone and navigate
+git clone https://github.com/anonymousd3vs/Traffic_Control.git
+cd Traffic_Control
+
+# Start all services (Backend + Frontend + Detection)
+docker-compose -f docker/docker-compose.yml up -d
+
+# Open in browser
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8765
+```
+
+### Docker Images
+
+| Service  | Image              | Port | Purpose                |
+| -------- | ------------------ | ---- | ---------------------- |
+| Backend  | `python:3.11-slim` | 8765 | Detection engine + API |
+| Frontend | `node:18 → nginx`  | 3000 | React dashboard        |
+| Network  | Bridge             | -    | Internal communication |
+
+### Deployment Options
+
+**Option 1: Linux/Windows/macOS (Standard)**
+
+```bash
+docker-compose -f docker/docker-compose.yml up
+```
+
+**Option 2: Raspberry Pi 5 (ARM64 Optimized)**
+
+```bash
+docker-compose -f docker/raspberrypi/docker-compose.rpi.yml up
+```
+
+**Option 3: Build & Deploy Custom**
+
+```bash
+# Build images
+docker build -f docker/backend/Dockerfile -t traffic-backend .
+docker build -f docker/frontend/Dockerfile -t traffic-frontend .
+
+# Run backend
+docker run -d -p 8765:8765 \
+  -v $(pwd)/videos:/app/videos \
+  -v $(pwd)/output:/app/output \
+  traffic-backend
+
+# Run frontend
+docker run -d -p 3000:3000 traffic-frontend
+```
+
+### Environment Configuration
+
+Create `.env` file:
+
+```env
+DETECTION_MODE=zone  # or 'line'
+GPU_ENABLED=false
+MODEL_PATH=/app/optimized_models
+VIDEO_INPUT=/app/videos
+VIDEO_OUTPUT=/app/output
+```
+
+See `docker/README.md` and `docker/DOCKER_GUIDE.md` for complete documentation.
+
+---
+
 ## 🎛 Dashboard Overview
 
 **Status:** ✅ Production Ready
@@ -759,5 +835,5 @@ See `dashboard/README.md` for complete documentation.
 ---
 
 **Version:** 2.2 - Phase 2 Complete (Traffic Signals + Dashboard)  
-**Last Updated:** October 25, 2025  
+**Last Updated:** October 26, 2025  
 **Repository:** [github.com/anonymousd3vs/Traffic_Control](https://github.com/anonymousd3vs/Traffic_Control)

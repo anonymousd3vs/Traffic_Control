@@ -9,6 +9,7 @@
 ## 🚀 Quick Start (2 Minutes)
 
 ### Prerequisites
+
 - Docker installed ([Get Docker](https://www.docker.com/products/docker-desktop))
 - Docker Compose (included with Docker Desktop)
 - ~5GB free disk space
@@ -25,6 +26,7 @@ docker-compose -f docker/docker-compose.yml up
 ```
 
 **That's it!** Open browser:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8765
 
@@ -42,16 +44,19 @@ docker-compose -f docker/docker-compose.yml up -d
 ```
 
 **Services Started:**
+
 - ✅ Backend (Python detection engine) - Port 8765
 - ✅ Frontend (React dashboard) - Port 3000
 - ✅ Auto-configured networking
 
 **Stop Services:**
+
 ```bash
 docker-compose -f docker/docker-compose.yml down
 ```
 
 **View Logs:**
+
 ```bash
 docker-compose -f docker/docker-compose.yml logs -f
 ```
@@ -68,6 +73,7 @@ docker-compose -f docker/raspberrypi/docker-compose.rpi.yml up -d
 ```
 
 **Differences:**
+
 - Optimized for ARM64 architecture
 - Lower memory footprint
 - ONNX inference optimized for RPi
@@ -79,15 +85,17 @@ docker-compose -f docker/raspberrypi/docker-compose.rpi.yml up -d
 **For:** Custom configurations or learning
 
 **Pull Images from Docker Hub:**
+
 ```bash
 # Backend image
-docker pull anonymousd3vs/traffic-backend:latest
+docker pull anonymousd3vs/traffic_control:backend-latest
 
 # Frontend image
-docker pull anonymousd3vs/traffic-frontend:latest
+docker pull anonymousd3vs/traffic_control:frontend-latest
 ```
 
 **Run Backend:**
+
 ```bash
 docker run -d \
   --name traffic-backend \
@@ -96,18 +104,20 @@ docker run -d \
   -v $(pwd)/output:/app/output \
   -v $(pwd)/config:/app/config \
   -e DETECTION_MODE=zone \
-  anonymousd3vs/traffic-backend:latest
+  anonymousd3vs/traffic_control:backend-latest
 ```
 
 **Run Frontend:**
+
 ```bash
 docker run -d \
   --name traffic-frontend \
   -p 3000:3000 \
-  anonymousd3vs/traffic-frontend:latest
+  anonymousd3vs/traffic_control:frontend-latest
 ```
 
 **Run with Network Connection:**
+
 ```bash
 # Create network
 docker network create traffic-network
@@ -119,14 +129,14 @@ docker run -d \
   -p 8765:8765 \
   -v $(pwd)/videos:/app/videos \
   -v $(pwd)/output:/app/output \
-  anonymousd3vs/traffic-backend:latest
+  anonymousd3vs/traffic_control:backend-latest
 
 # Run frontend
 docker run -d \
   --name traffic-frontend \
   --network traffic-network \
   -p 3000:3000 \
-  anonymousd3vs/traffic-frontend:latest
+  anonymousd3vs/traffic_control:frontend-latest
 ```
 
 ---
@@ -164,6 +174,7 @@ FRONTEND_PORT=3000
 ```
 
 **Load in Docker Compose:**
+
 ```yaml
 services:
   backend:
@@ -205,22 +216,26 @@ Traffic_Control/
 
 ### Image Details
 
-| Image | Size | Base | Purpose |
-|-------|------|------|---------|
-| `traffic-backend:latest` | ~850MB | Python 3.11-slim | Detection + API |
-| `traffic-frontend:latest` | ~180MB | Node 18 → Nginx | React Dashboard |
+| Image                                           | Size   | Base             | Purpose         |
+| ----------------------------------------------- | ------ | ---------------- | --------------- |
+| `anonymousd3vs/traffic_control:backend-latest`  | ~850MB | Python 3.12-slim | Detection + API |
+| `anonymousd3vs/traffic_control:frontend-latest` | ~180MB | Node 18 → Nginx  | React Dashboard |
 
 ### Available Tags
 
 ```bash
-# Latest stable
-docker pull anonymousd3vs/traffic-backend:latest
+# Latest stable backend
+docker pull anonymousd3vs/traffic_control:backend-latest
+
+# Latest stable frontend
+docker pull anonymousd3vs/traffic_control:frontend-latest
 
 # Specific version
-docker pull anonymousd3vs/traffic-backend:v2.2
+docker pull anonymousd3vs/traffic_control:backend-v2.2
+docker pull anonymousd3vs/traffic_control:frontend-v2.2
 
 # ARM64 for Raspberry Pi
-docker pull anonymousd3vs/traffic-backend:latest-arm64
+docker pull anonymousd3vs/traffic_control:backend-latest-arm64
 ```
 
 ---
@@ -386,21 +401,25 @@ docker run --rm \
 ### For Optimal Performance
 
 1. **Enable GPU (if available)**
+
    ```bash
    docker run --gpus all traffic-backend
    ```
 
 2. **Increase Workers**
+
    ```env
    BACKEND_WORKERS=8  # Default: 4
    ```
 
 3. **Optimize Memory**
+
    ```bash
    docker run -m 4g traffic-backend
    ```
 
 4. **Use Zone-Based Mode** (faster)
+
    ```env
    DETECTION_MODE=zone
    ```
@@ -421,8 +440,8 @@ docker run --rm \
 # docker-compose.yml
 services:
   backend:
-    user: "1000:1000"  # Non-root user
-    read_only: true    # Read-only filesystem
+    user: "1000:1000" # Non-root user
+    read_only: true # Read-only filesystem
 ```
 
 ### Limit Resource Usage
@@ -456,26 +475,26 @@ docker run --network traffic-net traffic-backend
 cd docker/backend
 
 # Build
-docker build -t my-traffic-backend:custom .
+docker build -t anonymousd3vs/traffic_control:backend-custom .
 
 # Run
-docker run -p 8765:8765 my-traffic-backend:custom
+docker run -p 8765:8765 anonymousd3vs/traffic_control:backend-custom
 ```
 
 ### Push to Private Registry
 
 ```bash
 # Tag for private registry
-docker tag traffic-backend:latest \
-  myregistry.azurecr.io/traffic-backend:latest
+docker tag anonymousd3vs/traffic_control:backend-latest \
+  myregistry.azurecr.io/traffic_control:backend-latest
 
 # Push
-docker push myregistry.azurecr.io/traffic-backend:latest
+docker push myregistry.azurecr.io/traffic_control:backend-latest
 ```
 
 ### Kubernetes Deployment (Advanced)
 
-```yaml
+````yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -492,16 +511,14 @@ spec:
     spec:
       containers:
       - name: backend
-        image: anonymousd3vs/traffic-backend:latest
+        image: anonymousd3vs/traffic_control:backend-latest
         ports:
         - containerPort: 8765
         resources:
           limits:
             memory: "2Gi"
             cpu: "2"
-```
-
----
+```---
 
 ## 🆘 Support & Troubleshooting
 
@@ -542,6 +559,7 @@ A: ~5GB for images + space for videos/output.
 
 ---
 
-**Version:** 2.2  
-**Last Updated:** October 26, 2025  
+**Version:** 2.2
+**Last Updated:** October 26, 2025
 **Repository:** [github.com/anonymousd3vs/Traffic_Control](https://github.com/anonymousd3vs/Traffic_Control)
+````
