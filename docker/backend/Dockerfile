@@ -7,7 +7,6 @@ WORKDIR /build
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    libopencv-dev \
     python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,9 +23,7 @@ WORKDIR /app
 
 # Install runtime dependencies only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libopencv-core4 \
-    libopencv-imgproc4 \
-    libopencv-highgui4 \
+    python3-opencv \
     libsm6 \
     libxext6 \
     libxrender-dev \
