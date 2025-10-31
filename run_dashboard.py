@@ -247,7 +247,7 @@ class DashboardLauncher:
 
             # Wait for server to start and capture output
             time.sleep(3)
-            
+
             # Check if process is still running
             if self.frontend_process.poll() is None:
                 logger.info(
@@ -265,14 +265,14 @@ class DashboardLauncher:
                         error_output.append(line.strip())
                 except:
                     pass
-                
+
                 logger.error("❌ Frontend server failed to start")
                 if error_output:
                     logger.error("Frontend error output:")
                     for line in error_output[-20:]:  # Last 20 lines
                         if line:
                             logger.error(f"  {line}")
-                
+
                 return False
 
         except Exception as e:
