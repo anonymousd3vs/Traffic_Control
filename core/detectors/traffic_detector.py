@@ -484,8 +484,9 @@ class ONNXTrafficDetector:
         if os.path.exists(vehicle_model_path):
             logger.info(f"Loading vehicle model from {vehicle_model_path}")
             try:
+                # Lowered to 0.3 for better detection on new systems
                 self.vehicle_model = ONNXYOLODetector(
-                    vehicle_model_path, conf_thres=0.25)
+                    vehicle_model_path, conf_thres=0.3)
                 logger.info("Vehicle model loaded successfully!")
             except Exception as e:
                 logger.error(f"Error loading vehicle model: {str(e)}")
