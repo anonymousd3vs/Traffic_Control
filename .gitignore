@@ -2,9 +2,82 @@
 # Excludes large/unnecessary files while keeping project functional
 
 # ============================================================================
+# IMPORTANT: Files to KEEP (Must come FIRST to override wildcards)
+# ============================================================================
+# Keep all essential config files (MUST be before *.json, *.yaml, *.xml rules)
+!requirements.txt
+!requirements_optimized.txt
+!README.md
+!PRODUCTION_SUMMARY.md
+!SETUP_GUIDE.md
+!setup.py
+!setup.bat
+!setup.sh
+!setup_environment.py
+!final_tracking_detection.py
+!verify_detection_mode.py
+
+# Keep source code
+!src/
+!src/**/*.py
+
+# Keep all configuration (yaml, json, xml)
+!config/
+!config/**/*.yaml
+!config/**/*.json
+!config/**/*.xml
+!config/README.md
+
+# Keep dashboard (frontend and backend)
+!dashboard/
+!dashboard/frontend/
+!dashboard/frontend/package.json
+!dashboard/frontend/package-lock.json
+!dashboard/frontend/vite.config.js
+!dashboard/frontend/*.html
+!dashboard/frontend/src/
+!dashboard/frontend/public/
+!dashboard/backend/
+!dashboard/backend/package.json
+!dashboard/backend/package-lock.json
+
+# Keep tests
+!tests/
+!tests/**/*.py
+
+# Keep documentation
+!docs/
+!docs/**/*.md
+!docs/**/*.txt
+
+# Keep project management
+!.kiro/
+!.kiro/specs/
+!.kiro/specs/**/*.md
+
+# Keep core modules
+!core/
+!core/**/*.py
+!shared/
+!shared/**/*.py
+!traffic_signals/
+!traffic_signals/**/*.py
+
+# Keep optimized models (production use)
+!optimized_models/
+!optimized_models/*.onnx
+
+# Keep essential dotfiles
+!.gitignore
+!.gitattributes
+!.env.example
+!pyproject.toml
+!setup.cfg
+
+# ============================================================================
 # YOLO Models (Large Files - Download automatically)
 # ============================================================================
-# Exclude raw model files (except optimized versions)
+# Exclude raw/unoptimized model files
 *.pt
 *.engine
 *.trt
@@ -12,18 +85,10 @@ models/*.pt
 models/*.engine
 models/*.trt
 models/Results(new_indian_ambulance_yolov11n)
-# Exclude YOLO models in root directory (will be downloaded by setup script)
 yolov8*.pt
 roboflow_ambulance*.pt
-
-# IMPORTANT: DO NOT exclude optimized_models/ folder
-# The optimized_models/ folder is INCLUDED in the repo as it contains:
-# - Pre-optimized ONNX models for production use
-# - Quantized models for Raspberry Pi deployment
-# - These are lightweight versions needed for deployment
-# Only exclude individual *.onnx files in models/ folder
 models/*.onnx
-.playwright-mcp
+
 # ============================================================================
 # Python Environment & Dependencies
 # ============================================================================
@@ -36,6 +101,7 @@ ENV/
 .conda/
 conda-meta/
 debug/
+
 # Python cache and compiled files
 __pycache__/
 *.py[cod]
@@ -63,6 +129,15 @@ MANIFEST
 # PyInstaller
 *.manifest
 *.spec
+
+# ============================================================================
+# Node.js Dependencies (automatically installed)
+# ============================================================================
+node_modules/
+npm-debug.log
+npm-error.log
+yarn-error.log
+package-lock.json.backup
 
 # ============================================================================
 # IDE and Editor Files
@@ -132,7 +207,7 @@ Temporary Items
 .nfs*
 
 # ============================================================================
-# Data and Output Files
+# Data and Output Files (Exclude generated/temporary data)
 # ============================================================================
 # Video files (usually large)
 *.mp4
@@ -144,7 +219,7 @@ Temporary Items
 *.webm
 *.m4v
 
-# Image files (screenshots, outputs)
+# Image files (generated screenshots, outputs)
 *.jpg
 *.jpeg
 *.png
@@ -162,15 +237,15 @@ Temporary Items
 *.aac
 *.ogg
 
-# Data files
+# Data files (generated, not config)
 *.csv
 *.xlsx
 *.xls
-*.json
-*.xml
 *.sqlite
 *.db
 *.sqlite3
+
+# Note: *.json, *.yaml, *.xml are kept for config files (see top)
 
 # Compressed files
 *.zip
@@ -200,10 +275,11 @@ temp/
 *.temp
 *.swp
 *.swo
-*~
 data/
-logs/
-.kiro/
+.kiro/cache/
+.kiro/logs/
+.kiro/temp/
+
 # Cache directories
 .cache/
 cache/
@@ -220,11 +296,11 @@ coverage.xml
 
 videos/
 images/
+
 # ============================================================================
 # AI/ML Specific Files
 # ============================================================================
 # Ultralytics YOLO cache
-
 *.cache
 yolo_cache/
 
@@ -232,7 +308,7 @@ yolo_cache/
 tensorboard_logs/
 tb_logs/
 
-# Model checkpoints and weights
+# Model checkpoints and weights (raw, not optimized)
 checkpoints/
 weights/
 *.pth
@@ -249,9 +325,9 @@ data/external/
 *.tfrecord
 
 # ============================================================================
-# Configuration and Secrets
+# Secrets and Security (Never commit these)
 # ============================================================================
-# Environment variables
+# Environment variables (NEVER COMMIT .env with real values)
 .env
 .env.local
 .env.*.local
@@ -263,9 +339,6 @@ secrets/
 *.pem
 *.p12
 *.pfx
-config/secrets.yaml
-config/production.yaml
-config/staging.yaml
 
 # ============================================================================
 # Testing and Coverage
@@ -274,20 +347,7 @@ config/staging.yaml
 test-results/
 test_results/
 .pytest_cache/
-.coverage
-htmlcov/
-coverage.xml
-*.cover
-nosetests.xml
-coverage.xml
-*.coveragerc
 gpu_check.ipynb
-# ============================================================================
-# Documentation Build Files
-# ============================================================================
-docs/_build/
-docs/build/
-site/
 
 # ============================================================================
 # Backup Files
@@ -298,15 +358,12 @@ site/
 *_backup
 *_old
 *.orig
+*.json.backup
+*.yaml.backup
 
 # ============================================================================
 # Project Specific Exclusions
 # ============================================================================
-# Kiro IDE files (keep .kiro/specs but exclude cache)
-.kiro/cache/
-.kiro/logs/
-.kiro/temp/
-
 # Output directories
 output/
 outputs/
@@ -315,55 +372,14 @@ screenshots/
 recordings/
 Vehicle Dataset/
 dataset/
-# Analysis files
 analysis/
 reports/
 metrics/
 new_dataset/
-# ============================================================================
-# IMPORTANT: Files to KEEP (Override exclusions)
-# ============================================================================
-# Force include essential project files
-!requirements.txt
-!requirements_optimized.txt
-!final_tracking_detection.py
-!README.md
-!PRODUCTION_SUMMARY.md
-!SETUP_GUIDE.md
-!setup.py
-!setup.bat
-!setup.sh
-!setup_environment.py
-
-# Keep source code
-!src/
-!src/**/*.py
-
-# Keep configuration templates
-!config/
-!config/*.yaml
-!config/*.json
-!config/README.md
-
-# Keep tests
-!tests/
-!tests/**/*.py
-
-# Keep documentation
-!docs/
-!docs/**/*.md
-
-# Keep specs and project management
-!.kiro/specs/
-!.kiro/specs/**/*.md
-verify_detection_mode.py
-# Keep essential config files
-!.gitignore
-!.gitattributes
-!pyproject.toml
-!setup.cfg
-# Ignore all Markdown files in the recent_changes_docs
 recent_changes_docs/
+
+# Misc excluded
+.playwright-mcp
 
 # ============================================================================
 # Git LFS (Large File Storage) - for future use
