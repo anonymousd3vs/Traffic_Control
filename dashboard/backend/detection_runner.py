@@ -216,9 +216,20 @@ class DetectionStreamingRunner:
                     break
 
                 try:
-                    # Run detection on frame
+                    # Run detection on frame with super detailed logging
+                    sys.stdout.write(
+                        f"[FRAME_PROCESS] Starting frame {frame_count} processing\n")
+                    sys.stdout.flush()
                     logger.debug(f"Processing frame {frame_count}...")
+
+                    sys.stdout.write(
+                        f"[FRAME_PROCESS] Calling detector.process_frame()\n")
+                    sys.stdout.flush()
                     output_frame = self.detector.process_frame(frame)
+
+                    sys.stdout.write(
+                        f"[FRAME_PROCESS] process_frame() returned successfully\n")
+                    sys.stdout.flush()
                     logger.debug(f"Frame {frame_count} processed successfully")
 
                     # If process_frame returns None, skip this frame
@@ -286,9 +297,18 @@ class DetectionStreamingRunner:
                                 f"❌ Metrics broadcast error: {me}", exc_info=True)
 
                 except Exception as e:
+                    sys.stdout.write(
+                        f"[FRAME_PROCESS_ERROR] Exception during frame processing: {type(e).__name__}: {e}\n")
+                    sys.stdout.flush()
+                    sys.stderr.write(
+                        f"[FRAME_PROCESS_ERROR] Exception during frame processing: {type(e).__name__}: {e}\n")
+                    sys.stderr.flush()
                     logger.error(
                         f"❌ CRITICAL: Error processing frame {frame_count}: {e}", exc_info=True)
-                    logger.error(f"Stack trace: ", exc_info=True)
+                    import traceback
+                    logger.error(f"Stack trace:\n{traceback.format_exc()}")
+                    logger.error(
+                        "Stopping detection due to frame processing error")
                     # Don't continue on critical errors - stop detection
                     break
 
