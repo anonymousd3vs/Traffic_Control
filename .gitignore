@@ -364,7 +364,7 @@ verify_detection_mode.py
 !setup.cfg
 # Ignore all Markdown files in the recent_changes_docs
 recent_changes_docs/
-config/
+
 # ============================================================================
 # Git LFS (Large File Storage) - for future use
 # ============================================================================
