@@ -28,10 +28,12 @@ logger = logging.getLogger(__name__)
 # Custom exception hook for threads to log uncaught exceptions
 def thread_exception_hook(args):
     """Log uncaught exceptions in threads"""
-    logger.error(f"🔴 UNCAUGHT THREAD EXCEPTION: {args.exc_type.__name__}: {args.exc_value}")
+    logger.error(
+        f"🔴 UNCAUGHT THREAD EXCEPTION: {args.exc_type.__name__}: {args.exc_value}")
     import traceback
     logger.error(f"Thread: {args.thread}")
-    logger.error(f"Full traceback:\n{''.join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback))}")
+    logger.error(
+        f"Full traceback:\n{''.join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback))}")
 
 
 # Install the custom exception hook
@@ -313,7 +315,8 @@ class DetectionStreamingRunner:
                     if hasattr(self.detector, 'stop'):
                         self.detector.stop()
                 except Exception as cleanup_error:
-                    logger.warning(f"Error during detector cleanup: {cleanup_error}")
+                    logger.warning(
+                        f"Error during detector cleanup: {cleanup_error}")
 
     def _encode_frame(self, frame) -> str:
         """
