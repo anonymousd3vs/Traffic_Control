@@ -466,57 +466,77 @@ class ONNXTrafficDetector:
         """Initialize ONNX models"""
         logger.info("Initializing ONNX models...")
 
-        # Get the absolute path to the project root directory
-        # From core/detectors/ go up two levels to project root
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_dir = os.path.dirname(os.path.dirname(current_dir))
+        try:
+            # Get the absolute path to the project root directory
+            # From core/detectors/ go up two levels to project root
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            project_dir = os.path.dirname(os.path.dirname(current_dir))
 
-        # Paths to optimized models - using absolute paths from project root
-        vehicle_model_path = os.path.join(
-            project_dir, "optimized_models", "yolo11n_optimized.onnx")
-        ambulance_model_path = os.path.join(
-            project_dir, "optimized_models", "indian_ambulance_yolov11n_best_optimized.onnx")
+            # Paths to optimized models - using absolute paths from project root
+            vehicle_model_path = os.path.join(
+                project_dir, "optimized_models", "yolo11n_optimized.onnx")
+            ambulance_model_path = os.path.join(
+                project_dir, "optimized_models", "indian_ambulance_yolov11n_best_optimized.onnx")
 
-        logger.debug(f"Looking for vehicle model at: {vehicle_model_path}")
-        logger.debug(f"Looking for ambulance model at: {ambulance_model_path}")
+            logger.debug(f"Looking for vehicle model at: {vehicle_model_path}")
+            logger.debug(
+                f"Looking for ambulance model at: {ambulance_model_path}")
 
-        # Initialize vehicle detector
-        if os.path.exists(vehicle_model_path):
-            logger.info(f"Loading vehicle model from {vehicle_model_path}")
-            try:
-                # Lowered to 0.3 for better detection on new systems
-                self.vehicle_model = ONNXYOLODetector(
-                    vehicle_model_path, conf_thres=0.3)
-                logger.info("Vehicle model loaded successfully!")
-            except Exception as e:
-                logger.error(f"Error loading vehicle model: {str(e)}")
-                raise
-        else:
-            error_msg = f"Vehicle model not found at {vehicle_model_path}"
-            logger.error(error_msg)
-            raise FileNotFoundError(error_msg)
+            # Initialize vehicle detector
+            if os.path.exists(vehicle_model_path):
+                logger.info(f"Loading vehicle model from {vehicle_model_path}")
+                try:
+                    logger.info(
+                        f"Vehicle model file size: {os.path.getsize(vehicle_model_path) / (1024*1024):.2f} MB")
+                    # Lowered to 0.3 for better detection on new systems
+                    self.vehicle_model = ONNXYOLODetector(
+                        vehicle_model_path, conf_thres=0.3)
+                    logger.info("✅ Vehicle model loaded successfully!")
+                except Exception as e:
+                    logger.error(
+                        f"❌ Error loading vehicle model: {str(e)}", exc_info=True)
+                    import traceback
+                    logger.error(f"Traceback:\n{traceback.format_exc()}")
+                    raise
+            else:
+                error_msg = f"Vehicle model not found at {vehicle_model_path}"
+                logger.error(error_msg)
+                raise FileNotFoundError(error_msg)
 
-        # Initialize ambulance detector with lower threshold for better small ambulance detection
-        if os.path.exists(ambulance_model_path):
-            logger.info(f"Loading ambulance model from {ambulance_model_path}")
-            try:
-                # Use multiple confidence levels balanced for real ambulance detection
-                self.ambulance_model = ONNXAmbulanceDetector(
-                    ambulance_model_path, conf_thres=0.01)  # Lower base threshold
-                # More sensitive levels including very low
-                self.ambulance_confidence_levels = [0.15, 0.08, 0.04, 0.02]
-                logger.info("Ambulance model loaded successfully!")
-            except Exception as e:
-                logger.warning(f"Error loading ambulance model: {str(e)}")
+            # Initialize ambulance detector with lower threshold for better small ambulance detection
+            if os.path.exists(ambulance_model_path):
+                logger.info(
+                    f"Loading ambulance model from {ambulance_model_path}")
+                try:
+                    logger.info(
+                        f"Ambulance model file size: {os.path.getsize(ambulance_model_path) / (1024*1024):.2f} MB")
+                    # Use multiple confidence levels balanced for real ambulance detection
+                    self.ambulance_model = ONNXAmbulanceDetector(
+                        ambulance_model_path, conf_thres=0.01)  # Lower base threshold
+                    # More sensitive levels including very low
+                    self.ambulance_confidence_levels = [0.15, 0.08, 0.04, 0.02]
+                    logger.info("✅ Ambulance model loaded successfully!")
+                except Exception as e:
+                    logger.warning(
+                        f"❌ Error loading ambulance model: {str(e)}", exc_info=True)
+                    import traceback
+                    logger.warning(f"Traceback:\n{traceback.format_exc()}")
+                    logger.warning("Continuing without ambulance detection...")
+                    self.ambulance_model = None
+            else:
+                logger.warning(
+                    f"Ambulance model not found at {ambulance_model_path}")
                 logger.warning("Continuing without ambulance detection...")
                 self.ambulance_model = None
-        else:
-            logger.warning(
-                f"Ambulance model not found at {ambulance_model_path}")
-            logger.warning("Continuing without ambulance detection...")
-            self.ambulance_model = None
 
-        logger.info("Model initialization complete!")
+            logger.info("✅ Model initialization complete!")
+
+        except Exception as e:
+            logger.error(
+                f"🔴 CRITICAL ERROR in _initialize_models: {str(e)}", exc_info=True)
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            raise
 
     def load_lane_config(self):
         """Load lane configuration from JSON file"""
