@@ -137,6 +137,7 @@ class DetectionStreamingRunner:
             lane_filtering: Whether to use lane filtering
             config_path: Path to lane config
         """
+        logger.info("=== STARTING DETECTION LOOP ===")
         try:
             # Initialize detector
             logger.info("Initializing detector...")
@@ -151,7 +152,9 @@ class DetectionStreamingRunner:
                 detector_kwargs['lane_config_path'] = None
 
             # Create detector with appropriate configuration
+            logger.info(f"Creating detector with kwargs: {detector_kwargs}")
             self.detector = ONNXTrafficDetector(**detector_kwargs)
+            logger.info("✅ Detector created successfully")
 
             # Set environment variable for headless mode
             os.environ['DASHBOARD_MODE'] = '1'
@@ -280,8 +283,15 @@ class DetectionStreamingRunner:
                 f"Detection loop ended. Processed {frame_count} frames.")
 
         except Exception as e:
-            logger.error(f"Detection loop error: {e}", exc_info=True)
+            logger.error(f"🔴 DETECTION LOOP EXCEPTION: {e}", exc_info=True)
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+        except BaseException as be:
+            logger.error(f"🔴 CRITICAL DETECTION LOOP ERROR (BaseException): {be}", exc_info=True)
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
         finally:
+            logger.info("=== DETECTION LOOP ENDING ===")
             self.is_running = False
             if self.detector:
                 try:
