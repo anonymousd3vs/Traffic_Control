@@ -21,3 +21,9 @@ aiohttp>=3.8.0
 aiohttp-cors>=0.7.0
 Flask>=2.3.0
 flask-cors>=4.0.0
+
+# HTTP requests (for health checks)
+requests>=2.31.0
+
+# ONNX Runtime for optimized inference
+onnxruntime>=1.16.0

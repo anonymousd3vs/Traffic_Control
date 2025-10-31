@@ -62,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 EXPOSE 8765
 
 # Run backend
-CMD ["python", "-u", "dashboard/backend/server.py"]
+CMD ["python", "-u", "dashboard/backend/unified_server.py"]
