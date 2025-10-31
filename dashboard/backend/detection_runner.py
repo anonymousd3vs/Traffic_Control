@@ -186,29 +186,42 @@ class DetectionStreamingRunner:
             # Detection loop
             logger.info("Starting detection loop...")
             while self.is_running:
-                ret, frame = cap.read()
+                try:
+                    ret, frame = cap.read()
 
-                if not ret:
-                    logger.info("End of video or read error")
+                    if not ret:
+                        logger.info("End of video or read error")
+                        break
+                except Exception as e:
+                    logger.error(
+                        f"❌ Error reading frame from video: {e}", exc_info=True)
                     break
 
                 try:
                     # Run detection on frame
+                    logger.debug(f"Processing frame {frame_count}...")
                     output_frame = self.detector.process_frame(frame)
+                    logger.debug(f"Frame {frame_count} processed successfully")
 
                     # If process_frame returns None, skip this frame
                     if output_frame is None:
+                        logger.debug(
+                            f"Frame {frame_count} returned None, skipping")
                         continue
 
                     frame_count += 1
 
                     # Get detection results from detector attributes
+                    logger.debug(
+                        f"Getting detector attributes for frame {frame_count}")
                     vehicle_count = getattr(self.detector, 'vehicle_count', 0)
                     tracked_objects = getattr(self.detector, 'tracker', {})
                     if hasattr(tracked_objects, 'objects'):
                         detected_count = len(tracked_objects.objects)
                     else:
                         detected_count = 0
+                    logger.debug(
+                        f"Detected {vehicle_count} vehicles, {detected_count} tracked objects")
 
                     # Broadcast frame at interval (not every frame to reduce bandwidth)
                     if frame_count % frame_broadcast_interval == 0:
@@ -256,8 +269,10 @@ class DetectionStreamingRunner:
 
                 except Exception as e:
                     logger.error(
-                        f"Error processing frame {frame_count}: {e}", exc_info=True)
-                    continue
+                        f"❌ CRITICAL: Error processing frame {frame_count}: {e}", exc_info=True)
+                    logger.error(f"Stack trace: ", exc_info=True)
+                    # Don't continue on critical errors - stop detection
+                    break
 
             # Cleanup
             cap.release()
