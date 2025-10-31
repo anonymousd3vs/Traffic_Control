@@ -228,7 +228,7 @@ class DashboardLauncher:
                     cmd,
                     cwd=self.frontend_dir,
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     text=True,
                     encoding='utf-8',
                     errors='replace',
@@ -240,25 +240,45 @@ class DashboardLauncher:
                     ['npm', 'run', 'dev', '--', '--port', str(port)],
                     cwd=self.frontend_dir,
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     text=True,
                     bufsize=1
                 )
 
-            # Wait for server to start
+            # Wait for server to start and capture output
             time.sleep(3)
-
+            
+            # Check if process is still running
             if self.frontend_process.poll() is None:
                 logger.info(
                     f"✅ Frontend server started (PID: {self.frontend_process.pid})")
                 logger.info(f"   Dashboard: http://localhost:{port}")
                 return True
             else:
+                # Process exited, read error output
+                error_output = []
+                try:
+                    while True:
+                        line = self.frontend_process.stdout.readline()
+                        if not line:
+                            break
+                        error_output.append(line.strip())
+                except:
+                    pass
+                
                 logger.error("❌ Frontend server failed to start")
+                if error_output:
+                    logger.error("Frontend error output:")
+                    for line in error_output[-20:]:  # Last 20 lines
+                        if line:
+                            logger.error(f"  {line}")
+                
                 return False
 
         except Exception as e:
             logger.error(f"❌ Error starting frontend: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
 
     def _kill_process_tree(self, process):
