@@ -25,6 +25,19 @@ if str(project_root) not in sys.path:
 logger = logging.getLogger(__name__)
 
 
+# Custom exception hook for threads to log uncaught exceptions
+def thread_exception_hook(args):
+    """Log uncaught exceptions in threads"""
+    logger.error(f"🔴 UNCAUGHT THREAD EXCEPTION: {args.exc_type.__name__}: {args.exc_value}")
+    import traceback
+    logger.error(f"Thread: {args.thread}")
+    logger.error(f"Full traceback:\n{''.join(traceback.format_exception(args.exc_type, args.exc_value, args.exc_traceback))}")
+
+
+# Install the custom exception hook
+threading.excepthook = thread_exception_hook
+
+
 class DetectionStreamingRunner:
     """
     Runs traffic detection and streams frames to dashboard via WebSocket.
@@ -287,7 +300,8 @@ class DetectionStreamingRunner:
             import traceback
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
         except BaseException as be:
-            logger.error(f"🔴 CRITICAL DETECTION LOOP ERROR (BaseException): {be}", exc_info=True)
+            logger.error(
+                f"🔴 CRITICAL DETECTION LOOP ERROR (BaseException): {be}", exc_info=True)
             import traceback
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
         finally:
@@ -295,9 +309,11 @@ class DetectionStreamingRunner:
             self.is_running = False
             if self.detector:
                 try:
-                    self.detector.stop()
-                except:
-                    pass
+                    # Cleanup detector resources if method exists
+                    if hasattr(self.detector, 'stop'):
+                        self.detector.stop()
+                except Exception as cleanup_error:
+                    logger.warning(f"Error during detector cleanup: {cleanup_error}")
 
     def _encode_frame(self, frame) -> str:
         """
